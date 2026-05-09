@@ -1,0 +1,68 @@
+# Project-specific
+idea
+plan.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+pip-wheel-metadata/
+.uv/
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Alembic
+# (keep versions/ tracked)
+
+# Logs
+*.log
+logs/
+
+# Secrets
+*.pem
+*.key
+*.p12
