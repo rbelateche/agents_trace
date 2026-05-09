@@ -105,29 +105,4 @@ jobs:
         with:
           file: coverage.xml
         continue-on-error: true
-
-  frontend:
-    name: Frontend
-    runs-on: ubuntu-latest
-    if: hashFiles('frontend/package.json') != ''
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npx tsc --noEmit
+  # frontend job added in feat/run-list-api-ui (PR 5) once Next.js is scaffolded

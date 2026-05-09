@@ -47,4 +47,5 @@ db-migrate:
 	cd backend && uv run alembic upgrade head
 
 frontend-lint:
+	@[ -f $(FRONTEND_DIR)/package.json ] || { echo "frontend not scaffolded yet (PR 5)"; exit 0; }
 	cd $(FRONTEND_DIR) && npm run lint && npx tsc --noEmit
