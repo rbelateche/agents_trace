@@ -1,18 +1,27 @@
 """FastAPI application entrypoint."""
 
+import asyncio
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI
+
 from app.config import settings
 from app.database import engine
-from fastapi import FastAPI
+from app.worker import consume_forever
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    # Startup
+    stop_event = asyncio.Event()
+    worker_task = asyncio.create_task(consume_forever(stop_event))
     yield
-    # Shutdown
+    stop_event.set()
+    worker_task.cancel()
+    try:
+        await worker_task
+    except asyncio.CancelledError:
+        pass
     await engine.dispose()
 
 

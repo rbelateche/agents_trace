@@ -2,7 +2,6 @@ import enum
 import uuid
 from datetime import datetime
 
-from app.database import Base
 from sqlalchemy import (
     DateTime,
     Enum,
@@ -15,6 +14,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
+
+from app.database import Base
 
 
 class RunStatus(enum.StrEnum):

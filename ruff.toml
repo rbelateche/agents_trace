@@ -17,7 +17,7 @@ ignore = [
 ]
 
 [lint.isort]
-known-first-party = ["agents_trace", "backend", "demo"]
+known-first-party = ["agents_trace", "backend", "demo", "app"]
 
 [format]
 quote-style = "double"
