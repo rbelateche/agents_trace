@@ -3,7 +3,10 @@ name = "agents-trace-sdk"
 version = "0.1.0"
 description = "Instrumentation SDK for agents-trace"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "redis[hiredis]>=5.0.0",
+    "pydantic>=2.7.0",
+]
 
 [project.optional-dependencies]
 dev = []

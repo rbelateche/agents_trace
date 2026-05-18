@@ -71,8 +71,16 @@ provides-extras = ["dev"]
 name = "agents-trace-sdk"
 version = "0.1.0"
 source = { editable = "sdk" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "redis", extra = ["hiredis"] },
+]
 
 [package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.7.0" },
+    { name = "redis", extras = ["hiredis"], specifier = ">=5.0.0" },
+]
 provides-extras = ["dev"]
 
 [[package]]
