@@ -22,7 +22,7 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv pip install --system -e ".[dev]"
+        run: uv pip install --system -e ".[dev]" -e backend/ -e sdk/
 
       - name: Run ruff check
         run: uv run ruff check sdk/ backend/ demo/
@@ -45,7 +45,7 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv pip install --system -e ".[dev]"
+        run: uv pip install --system -e ".[dev]" -e backend/ -e sdk/
 
       - name: Run mypy
         run: uv run mypy sdk/ backend/ demo/
@@ -89,7 +89,7 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv pip install --system -e ".[dev]"
+        run: uv pip install --system -e ".[dev]" -e backend/ -e sdk/
 
       - name: Run tests
         env:

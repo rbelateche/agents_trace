@@ -38,9 +38,18 @@ exclude = [
 ]
 
 [[tool.mypy.overrides]]
-module = "backend.app.models.models"
-# SQLAlchemy DeclarativeBase subclassing is not fully typed
+# SQLAlchemy DeclarativeBase and pydantic BaseSettings subclassing are not fully typed
+module = [
+    "backend.app.models.models",
+    "backend.app.database",
+    "backend.app.config",
+]
 disallow_subclassing_any = false
+
+[[tool.mypy.overrides]]
+# FastAPI route decorators (@app.get etc.) are not typed
+module = "backend.app.main"
+disallow_untyped_decorators = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
