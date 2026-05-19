@@ -76,49 +76,83 @@ def planner_node(state: ResearchState, tracer: AgentTracer) -> ResearchState:
 
 
 def research_node(state: ResearchState, tracer: AgentTracer) -> ResearchState:
-    """Execute tool calls to gather raw research material."""
+    """Execute tool calls to gather raw research material.
+
+    Each tool invocation is a child span of ResearchAgent so the waterfall
+    view shows the full tree: ResearchAgent → web_search → retrieve_papers.
+    """
     results: list[str] = []
     error_count = state.get("error_count", 0)
 
-    with tracer.span("ResearchAgent", span_type="agent") as ctx:
+    with tracer.span("ResearchAgent", span_type="agent") as research_ctx:
         for question in state["sub_questions"]:
-            # web_search — first call will return malformed JSON
-            t_start = time.monotonic()
-            raw = web_search(question)
-            try:
-                parsed = json.loads(raw)
-                result_text = json.dumps(parsed)
-                tc_status = "success"
-                tc_error = None
-            except json.JSONDecodeError as e:
-                logger.warning("[ResearchAgent] web_search returned malformed JSON: %s", e)
-                error_count += 1
-                tc_status = "error"
-                tc_error = str(e)
-                # Retry once
+            # --- web_search (first call returns malformed JSON → retry) ---
+            with tracer.span(
+                "web_search",
+                span_type="tool",
+                parent_span_id=research_ctx.span_id,
+                input=question,
+            ) as tool_ctx:
+                t_start = time.monotonic()
                 raw = web_search(question)
-                result_text = raw
-            latency = int((time.monotonic() - t_start) * 1000)
-            tracer.record_tool_call(
-                ctx.span_id,
-                tool_name="web_search",
-                arguments={"query": question},
-                result=result_text[:500],
-                status=tc_status,
-                error=tc_error,
-                latency_ms=latency,
-            )
+                latency = int((time.monotonic() - t_start) * 1000)
+                try:
+                    result_text = json.dumps(json.loads(raw))
+                    tracer.record_tool_call(
+                        tool_ctx.span_id,
+                        tool_name="web_search",
+                        arguments={"query": question},
+                        result=result_text[:500],
+                        status="success",
+                        latency_ms=latency,
+                    )
+                except json.JSONDecodeError as e:
+                    logger.warning("[ResearchAgent] web_search malformed JSON: %s", e)
+                    error_count += 1
+                    tracer.record_tool_call(
+                        tool_ctx.span_id,
+                        tool_name="web_search",
+                        arguments={"query": question},
+                        status="error",
+                        error=str(e),
+                        latency_ms=latency,
+                    )
+                    # Retry in a new child span
+                    with tracer.span(
+                        "web_search",
+                        span_type="tool",
+                        parent_span_id=research_ctx.span_id,
+                        input=f"[retry] {question}",
+                    ) as retry_ctx:
+                        t2 = time.monotonic()
+                        raw = web_search(question)
+                        result_text = raw
+                        tracer.record_tool_call(
+                            retry_ctx.span_id,
+                            tool_name="web_search",
+                            arguments={"query": question, "retry": True},
+                            result=result_text[:500],
+                            status="success",
+                            latency_ms=int((time.monotonic() - t2) * 1000),
+                        )
+
             results.append(result_text)
 
-            # retrieve_papers
-            papers_raw = retrieve_papers(question)
-            tracer.record_tool_call(
-                ctx.span_id,
-                tool_name="retrieve_papers",
-                arguments={"topic": question},
-                result=papers_raw[:500],
-                status="success",
-            )
+            # --- retrieve_papers ---
+            with tracer.span(
+                "retrieve_papers",
+                span_type="tool",
+                parent_span_id=research_ctx.span_id,
+                input=question,
+            ) as papers_ctx:
+                papers_raw = retrieve_papers(question)
+                tracer.record_tool_call(
+                    papers_ctx.span_id,
+                    tool_name="retrieve_papers",
+                    arguments={"topic": question},
+                    result=papers_raw[:500],
+                    status="success",
+                )
             results.append(papers_raw)
 
     return {**state, "raw_research": results, "error_count": error_count}
