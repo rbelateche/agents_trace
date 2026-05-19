@@ -31,15 +31,22 @@ try:
     _LANGCHAIN_AVAILABLE = True
 except ImportError:  # pragma: no cover
     _LANGCHAIN_AVAILABLE = False
-    BaseCallbackHandler = object
-    LLMResult = Any
+
+    class BaseCallbackHandler:  # type: ignore[no-redef]
+        """Stub for environments without langchain_core installed."""
+
+        def __init__(self, **kwargs: Any) -> None:
+            pass
+
+    class LLMResult:  # type: ignore[no-redef]
+        """Stub for LLMResult."""
 
 
 def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class AgentTraceCallback(BaseCallbackHandler):  # type: ignore[misc]
+class AgentTraceCallback(BaseCallbackHandler):
     """LangChain/LangGraph callback that streams events to agents_trace."""
 
     def __init__(self, tracer: AgentTracer) -> None:
@@ -90,9 +97,11 @@ class AgentTraceCallback(BaseCallbackHandler):  # type: ignore[misc]
 
     def on_chain_error(
         self,
-        error: Exception | KeyboardInterrupt,
+        error: BaseException,
         *,
         run_id: UUID,
+        parent_run_id: UUID | None = None,
+        tags: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         span_id = self._span_map.pop(run_id, None)
@@ -145,9 +154,11 @@ class AgentTraceCallback(BaseCallbackHandler):  # type: ignore[misc]
 
     def on_tool_error(
         self,
-        error: Exception | KeyboardInterrupt,
+        error: BaseException,
         *,
         run_id: UUID,
+        parent_run_id: UUID | None = None,
+        tags: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         span_id = self._span_map.pop(run_id, None)
@@ -217,9 +228,11 @@ class AgentTraceCallback(BaseCallbackHandler):  # type: ignore[misc]
 
     def on_llm_error(
         self,
-        error: Exception | KeyboardInterrupt,
+        error: BaseException,
         *,
         run_id: UUID,
+        parent_run_id: UUID | None = None,
+        tags: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         span_id = self._span_map.pop(run_id, None)

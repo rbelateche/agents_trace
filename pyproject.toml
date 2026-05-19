@@ -61,6 +61,7 @@ disallow_untyped_calls = false
 module = "agents_trace.langgraph_handler"
 disallow_subclassing_any = false
 disallow_untyped_decorators = false
+warn_unused_ignores = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

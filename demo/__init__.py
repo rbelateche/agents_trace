@@ -1,1 +1,1 @@
-"""Demo agents — placeholder for PR 4 (feat/demo-workflow)."""
+"""Demo agents — research workflow for agents-trace."""
