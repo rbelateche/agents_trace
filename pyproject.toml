@@ -51,6 +51,11 @@ disallow_subclassing_any = false
 module = "backend.app.main"
 disallow_untyped_decorators = false
 
+[[tool.mypy.overrides]]
+# redis-py async types are incomplete
+module = "backend.app.worker"
+disallow_untyped_calls = false
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

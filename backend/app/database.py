@@ -1,8 +1,9 @@
 from collections.abc import AsyncGenerator
 
-from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
+
+from app.config import settings
 
 # asyncpg requires postgresql+asyncpg:// scheme
 _db_url = settings.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
