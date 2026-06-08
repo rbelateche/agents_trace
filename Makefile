@@ -20,7 +20,7 @@ help:
 	@echo "  frontend-lint  eslint + tsc inside frontend/"
 
 install:
-	uv pip install --system -e ".[dev]" -e backend/ -e sdk/
+	uv pip install --system -e ".[dev]" -e backend/ -e sdk/ -e demo/
 
 lint:
 	uv run ruff check $(PYTHON_DIRS)

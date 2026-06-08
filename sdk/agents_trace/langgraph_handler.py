@@ -18,35 +18,32 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from agents_trace.tracer import AgentTracer
 
-# LangChain's callback base is optional — only needed when LangGraph is installed.
-try:
-    from langchain_core.callbacks import BaseCallbackHandler
-    from langchain_core.outputs import LLMResult
+# LangChain's callback base is optional — only needed at runtime when LangGraph
+# is installed.  For type checking we deliberately treat the base as ``object``
+# so mypy does not depend on whether langchain-core is installed in the
+# environment, and does not flag the (intentionally relaxed) callback override
+# signatures.
+if TYPE_CHECKING:
+    _CallbackBase = object
+else:
+    try:
+        from langchain_core.callbacks import BaseCallbackHandler as _CallbackBase
+    except ImportError:  # pragma: no cover
 
-    _LANGCHAIN_AVAILABLE = True
-except ImportError:  # pragma: no cover
-    _LANGCHAIN_AVAILABLE = False
-
-    class BaseCallbackHandler:  # type: ignore[no-redef]
-        """Stub for environments without langchain_core installed."""
-
-        def __init__(self, **kwargs: Any) -> None:
-            pass
-
-    class LLMResult:  # type: ignore[no-redef]
-        """Stub for LLMResult."""
+        class _CallbackBase:  # minimal runtime fallback
+            def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
 
 def _utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-class AgentTraceCallback(BaseCallbackHandler):
+class AgentTraceCallback(_CallbackBase):
     """LangChain/LangGraph callback that streams events to agents_trace."""
 
     def __init__(self, tracer: AgentTracer) -> None:
