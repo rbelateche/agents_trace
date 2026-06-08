@@ -186,9 +186,7 @@ async def consume_forever(stop_event: asyncio.Event) -> None:
 
             # redis-py's async stubs type this loosely; with decode_responses=True
             # the concrete shape is list[(stream, list[(msg_id, fields)])].
-            results = cast(
-                "list[tuple[str, list[tuple[str, dict[str, str]]]]]", raw_results
-            )
+            results = cast("list[tuple[str, list[tuple[str, dict[str, str]]]]]", raw_results)
             async with AsyncSessionLocal() as session:
                 for _stream, messages in results:
                     for msg_id, fields in messages:
