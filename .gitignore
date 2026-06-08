@@ -55,6 +55,12 @@ Thumbs.db
 *.swp
 *.swo
 
+# Local tooling / virtual-filesystem caches (machine-specific, never committed)
+.stubs/
+.vfscache/
+.vfsmeta/
+.work-folder-info
+
 # Alembic
 # (keep versions/ tracked)
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from typing import cast
 
 from pydantic import TypeAdapter, ValidationError
 from redis.asyncio import Redis
@@ -173,16 +174,19 @@ async def consume_forever(stop_event: asyncio.Event) -> None:
 
     while not stop_event.is_set():
         try:
-            results = await client.xreadgroup(
+            raw_results = await client.xreadgroup(
                 groupname=REDIS_CONSUMER_GROUP,
                 consumername=REDIS_CONSUMER_NAME,
                 streams={REDIS_STREAM_KEY: ">"},
                 count=50,
                 block=1000,  # ms — yields control when idle
             )
-            if not results:
+            if not raw_results:
                 continue
 
+            # redis-py's async stubs type this loosely; with decode_responses=True
+            # the concrete shape is list[(stream, list[(msg_id, fields)])].
+            results = cast("list[tuple[str, list[tuple[str, dict[str, str]]]]]", raw_results)
             async with AsyncSessionLocal() as session:
                 for _stream, messages in results:
                     for msg_id, fields in messages:
